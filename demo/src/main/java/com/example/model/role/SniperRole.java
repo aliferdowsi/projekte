@@ -4,7 +4,7 @@ import com.example.model.player.Player;
 
 public class SniperRole extends Role {
     private Player shottedPlayer;
-
+    private Boolean hasSniperShot = false;
     public Player getShottedPlayer() {
         return shottedPlayer;
     }

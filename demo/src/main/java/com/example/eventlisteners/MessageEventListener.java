@@ -9,6 +9,10 @@ import com.example.model.player.Player;
 import com.example.commands.InteractionEventListener;
 import com.example.model.role.DetectiveRole;
 import com.example.model.role.DoctorRole;
+import com.example.model.role.GodFatherRole;
+import com.example.model.role.NegotiatorRole;
+import com.example.model.role.NormalMafiaRole;
+import com.example.model.role.SniperRole;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -45,29 +49,27 @@ public class MessageEventListener extends ListenerAdapter {
                 System.out.println("Author ID NOT  FOUND\n RETURNING");
                 return;
             }
-
-            for(int i = 0; i < game.getPlayers().size(); i++){
-               
-                
-                Player p = game.getPlayers().get(authorIndex);
-                if (p.getRole().getRole().equals("detective")) {
-                    setDetectiveNightData(authorIndex, targetIndex,event);
-                } 
-                if (p.getRole().getRole().equals("doctor")) {
-                    setDoctorNightData(authorIndex, targetIndex, event);
-                } 
-                if (p.getRole().getRole().equals("godfather")) {
-                } 
-                if (p.getRole().getRole().equals("sniper")) {
-                }
+            Player p = game.getPlayers().get(authorIndex);
+            if (p.getRole().getRole().equals("detective")) {
+                setDetectiveNightData(authorIndex, targetIndex,event);
+            } 
+            if (p.getRole().getRole().equals("doctor")) {
+                setDoctorNightData(authorIndex, targetIndex, event);
+            } 
+            if (p.getRole().getRole().equals("godfather")) {
+                setGodfatherNightData(authorIndex, targetIndex, event);
+            } 
+            if (p.getRole().getRole().equals("sniper")) {
+                setSniperNightData(authorIndex, targetIndex, event);
             }
-
+            //If godfather is out, we call the other mafias
+            if(game.getIsGodfatherOut() == true && (p.getRole().getRole().equals("negotiator") || p.getRole().getRole().equals("normalmafia")) ){
+                setGodfatherSubstituteNightData(authorIndex, targetIndex, event);
+            }
             
-
-           
         }
         super.onMessageReceived(event);
-        System.out.println("USER SAID:" + event.getMessage().getContentDisplay());
+        System.out.println(event.getAuthor().getName() +": " + event.getMessage().getContentDisplay());
     }
 
     boolean setDetectiveNightData(int authorIndex, int targetIndex,MessageReceivedEvent event){
@@ -120,8 +122,93 @@ public class MessageEventListener extends ListenerAdapter {
         } else {
             role.setSavedPlayer(game.getPlayers().get(targetIndex));
             game.getPlayers().get(authorIndex).setRole(role);
-            event.getChannel().sendMessage("The Person has been saved!\n").queue();
+            event.getChannel().sendMessage("SUCCESS!!!\n").queue();
             return true;
         }
+    }
+
+
+    boolean setGodfatherNightData(int authorIndex, int targetIndex,MessageReceivedEvent event){
+        GodFatherRole role = (GodFatherRole) game.getPlayers().get(authorIndex).getRole();
+        
+
+        String temprole = game.getPlayers().get(targetIndex).getRole().getRole();
+        if(this.textChannel.size() == 0){
+            System.out.println("Text Channel not found");
+            return false;
+        }
+        if(temprole == "godfather"){
+            event.getChannel().sendMessage("Cannot guess yourself\n").queue();
+            return false;
+        } else if (temprole == "negotiator" || temprole == "normalmafia") {
+            event.getChannel().sendMessage("You cannot kill your own teamates dummy!\n").queue();
+            return false;
+        } else {
+            event.getChannel().sendMessage("SUCCESS!!!\n").queue();
+            role.setKilledPlayer(game.getPlayers().get(targetIndex));
+            game.getPlayers().get(authorIndex).setRole(role);
+            return true;
+        }
+    }
+
+    boolean setGodfatherSubstituteNightData(int authorIndex, int targetIndex,MessageReceivedEvent event){
+        Player p = game.getPlayers().get(authorIndex);
+
+        if(p.getRole().getRole().equals("normalmafia")){
+            NormalMafiaRole role = (NormalMafiaRole) game.getPlayers().get(authorIndex).getRole();
+            String temprole = game.getPlayers().get(targetIndex).getRole().getRole();
+            if(this.textChannel.size() == 0){
+                System.out.println("Text Channel not found");
+                return false;
+            }
+            if(temprole == "normalmafia"){
+                event.getChannel().sendMessage("Cannot guess yourself\n").queue();
+                return false;
+            } else if (temprole == "negotiator") {
+                event.getChannel().sendMessage("You cannot kill your own dummy!\n").queue();
+                return false;
+            } else {
+                event.getChannel().sendMessage("SUCCESS!!!\n").queue();
+                role.setKilledPlayer(game.getPlayers().get(targetIndex));
+                game.getPlayers().get(authorIndex).setRole(role);
+                return true;
+            }
+        } else  {
+                    
+            NegotiatorRole role = (NegotiatorRole) game.getPlayers().get(authorIndex).getRole();
+            String temprole = game.getPlayers().get(targetIndex).getRole().getRole();
+            if(this.textChannel.size() == 0){
+                System.out.println("Text Channel not found");
+                return false;
+            }
+            if(temprole == "negotiator"){
+                event.getChannel().sendMessage("Cannot guess yourself\n").queue();
+                return false;
+            } else if (temprole == "normalmafia") {
+                event.getChannel().sendMessage("You cannot kill your own teamates dummy!\n").queue();
+                return false;
+            } else {
+                event.getChannel().sendMessage("SUCCESS!!!\n").queue();
+                role.setKilledPlayer(game.getPlayers().get(targetIndex));
+                game.getPlayers().get(authorIndex).setRole(role);
+                return true;
+            }
+        }
+        
+    }
+
+
+    boolean setSniperNightData(int authorIndex, int targetIndex,MessageReceivedEvent event){
+        SniperRole role = (SniperRole) game.getPlayers().get(authorIndex).getRole();
+        role.setShottedPlayer(game.getPlayers().get(targetIndex));
+        game.getPlayers().get(authorIndex).setRole(role);
+
+        String temprole = game.getPlayers().get(targetIndex).getRole().getRole();
+        if(this.textChannel.size() == 0){
+            System.out.println("Text Channel not found");
+            return false;
+        }
+        event.getChannel().sendMessage("SUCCESS!!!\n").queue();
+        return true;
     }
 }
