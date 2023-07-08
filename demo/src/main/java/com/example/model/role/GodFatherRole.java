@@ -3,6 +3,7 @@ package com.example.model.role;
 import com.example.model.player.Player;
 
 public class GodFatherRole extends Role {
+
     private Player killedPlayer;
 
     public Player getKilledPlayer() {

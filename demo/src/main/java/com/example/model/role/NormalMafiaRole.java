@@ -3,6 +3,7 @@ package com.example.model.role;
 import com.example.model.player.Player;
 
 public class NormalMafiaRole extends Role {
+
     private Player killedPlayer;
 
     public Player getKilledPlayer() {
@@ -16,5 +17,4 @@ public class NormalMafiaRole extends Role {
     public NormalMafiaRole() {
         super("normalmafia");
     }
-    
 }

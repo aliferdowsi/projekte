@@ -1,10 +1,11 @@
-com\example\configuration\TalkResource.class
 com\example\model\role\SniperRole.class
+com\example\configuration\VoicePlayer.class
 com\example\model\role\NormalMafiaRole.class
 com\example\model\role\Role.class
 com\example\eventlisteners\MessageEventListener.class
 com\example\model\role\NormalCitizenRole.class
 com\example\model\role\GodFatherRole.class
+com\example\configuration\VoicePlayer$1.class
 com\example\model\role\DoctorRole.class
 com\example\commands\InteractionEventListener.class
 com\example\model\game\Game.class

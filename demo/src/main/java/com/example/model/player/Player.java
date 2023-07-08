@@ -1,13 +1,13 @@
 package com.example.model.player;
 
 import com.example.model.role.Role;
-
 import net.dv8tion.jda.api.entities.Member;
 
 public class Player {
+
     private String name;
     private Role role;
-    private Member playerThemselves; // Discord object for JDA 
+    private Member playerThemselves; // Discord object for JDA
 
     public Member getPlayerThemselves() {
         return playerThemselves;

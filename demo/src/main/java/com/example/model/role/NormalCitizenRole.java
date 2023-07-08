@@ -5,5 +5,4 @@ public class NormalCitizenRole extends Role {
     public NormalCitizenRole() {
         super("normalcitizen");
     }
-    
 }
