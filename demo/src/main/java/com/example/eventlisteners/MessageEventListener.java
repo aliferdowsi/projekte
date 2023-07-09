@@ -1,6 +1,7 @@
 package com.example.eventlisteners;
 
 import com.example.commands.InteractionEventListener;
+import com.example.configuration.PlayerManager;
 import com.example.model.game.Game;
 import com.example.model.player.Player;
 import com.example.model.role.DetectiveRole;
@@ -11,9 +12,14 @@ import com.example.model.role.NormalMafiaRole;
 import com.example.model.role.SniperRole;
 import java.util.List;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageReaction;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,12 +27,15 @@ public class MessageEventListener extends ListenerAdapter {
 
     Game game = InteractionEventListener.game;
     List<TextChannel> textChannel;
+    PlayerManager playerManager = PlayerManager.get();
+    String currentDirectory = System.getProperty("user.dir");
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        this.textChannel = InteractionEventListener.textChannel;
         int targetIndex;
         int authorIndex = -1;
-        this.textChannel = InteractionEventListener.textChannel;
+        // Processing Players Night Commands
         if (event.getChannelType() == ChannelType.PRIVATE && event.getAuthor().isBot() == false) {
             String response = event.getMessage().getContentRaw();
             targetIndex = Integer.parseInt(response);
@@ -112,6 +121,7 @@ public class MessageEventListener extends ListenerAdapter {
                 role.setSavedHimself(true);
                 game.getPlayers().get(authorIndex).setRole(role);
                 event.getChannel().sendMessage("The Person has been saved!\n").queue();
+                game.setDoctorNightFinish(true);
                 return true;
             } else {
                 event.getChannel().sendMessage("You cannot save yourself twice!!\n").queue();
@@ -121,6 +131,7 @@ public class MessageEventListener extends ListenerAdapter {
             role.setSavedPlayer(game.getPlayers().get(targetIndex));
             game.getPlayers().get(authorIndex).setRole(role);
             event.getChannel().sendMessage("SUCCESS!!!\n").queue();
+            game.setDoctorNightFinish(true);
             return true;
         }
     }
@@ -143,6 +154,8 @@ public class MessageEventListener extends ListenerAdapter {
             event.getChannel().sendMessage("SUCCESS!!!\n").queue();
             role.setKilledPlayer(game.getPlayers().get(targetIndex));
             game.getPlayers().get(authorIndex).setRole(role);
+            game.setGodfatherNightFinish(true);
+            wakeDoctor();
             return true;
         }
     }
@@ -203,5 +216,30 @@ public class MessageEventListener extends ListenerAdapter {
         }
         event.getChannel().sendMessage("SUCCESS!!!\n").queue();
         return true;
+    }
+
+    public void wakeDoctor() {
+        for (Player p : game.getPlayers()) {
+            if (p.getRole().getRole().equals("doctor")) {
+                playAudio("announcement_doctor");
+                Member member = p.getPlayerThemselves();
+                member
+                    .getUser()
+                    .openPrivateChannel()
+                    .queue(privateChannel -> {
+                        privateChannel.sendMessage("Choose someone to SAVE!\n").queue();
+                        String message = "";
+                        for (int i = 0; i < game.getPlayers().size(); i++) {
+                            message += i + " - " + game.getPlayers().get(i).getName() + "\n";
+                        }
+                        privateChannel.sendMessage(message + "\n").queue();
+                    });
+            }
+        }
+    }
+
+    public void playAudio(String trackname) {
+        SlashCommandInteractionEvent event = InteractionEventListener.eventt;
+        playerManager.play(event.getGuild(), currentDirectory + "/src/main/voicerecording/" + trackname + ".m4a");
     }
 }

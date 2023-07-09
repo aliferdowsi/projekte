@@ -11,9 +11,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 public class DiscordBot {
 
     public static void main(String[] args) throws LoginException {
-        JDABuilder jdaBuilder = JDABuilder.createDefault(
-            "MTEyNjYzNDM4MTcxMzM1MDgyNg.GbtnuJ.0wZ4hHYJl7PYu8fIdXnzwoWcPcXEBh_9rKDH74"
-        );
+        JDABuilder jdaBuilder = JDABuilder.createDefault("x");
         JDA jda = jdaBuilder
             .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
             .addEventListeners(new MessageEventListener(), new InteractionEventListener())
@@ -44,5 +42,6 @@ public class DiscordBot {
             .addOption(OptionType.INTEGER, "second", "Player's turn in Seconds", true)
             .queue();
         jda.upsertCommand("startnight", "Starts the Night").setGuildOnly(false).queue();
+        jda.upsertCommand("startvote", "Starts the Voting").setGuildOnly(false).queue();
     }
 }

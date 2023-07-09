@@ -20,6 +20,43 @@ public class Game {
     private List<Player> players;
     private Boolean isGodfatherOut = false;
 
+    private Boolean godfatherNightFinish = false;
+    private Boolean doctorNightFinish = false;
+    private Boolean detectiveNightFinish = false;
+    private Boolean sniperNightFinish = false;
+
+    public Boolean getGodfatherNightFinish() {
+        return godfatherNightFinish;
+    }
+
+    public void setGodfatherNightFinish(Boolean godfatherNightFinish) {
+        this.godfatherNightFinish = godfatherNightFinish;
+    }
+
+    public Boolean getDoctorNightFinish() {
+        return doctorNightFinish;
+    }
+
+    public void setDoctorNightFinish(Boolean doctorNightFinish) {
+        this.doctorNightFinish = doctorNightFinish;
+    }
+
+    public Boolean getDetectiveNightFinish() {
+        return detectiveNightFinish;
+    }
+
+    public void setDetectiveNightFinish(Boolean detectiveNightFinish) {
+        this.detectiveNightFinish = detectiveNightFinish;
+    }
+
+    public Boolean getSniperNightFinish() {
+        return sniperNightFinish;
+    }
+
+    public void setSniperNightFinish(Boolean sniperNightFinish) {
+        this.sniperNightFinish = sniperNightFinish;
+    }
+
     public Boolean getIsGodfatherOut() {
         return isGodfatherOut;
     }
@@ -32,7 +69,7 @@ public class Game {
         Arrays.asList(
             new GodFatherRole(),
             //new NegotiatorRole(),
-            new DetectiveRole(),
+            //new DetectiveRole(),
             new DoctorRole()
             //new SniperRole()
         )

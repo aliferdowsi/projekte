@@ -8,6 +8,24 @@ public class Player {
     private String name;
     private Role role;
     private Member playerThemselves; // Discord object for JDA
+    private String byeAudio;
+    private String turnAudio;
+
+    public String getByeAudio() {
+        return byeAudio;
+    }
+
+    public void setByeAudio(String byeAudio) {
+        this.byeAudio = byeAudio;
+    }
+
+    public String getTurnAudio() {
+        return turnAudio;
+    }
+
+    public void setTurnAudio(String turnAudio) {
+        this.turnAudio = turnAudio;
+    }
 
     public Member getPlayerThemselves() {
         return playerThemselves;

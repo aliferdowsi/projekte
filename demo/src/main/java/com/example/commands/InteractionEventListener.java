@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -40,30 +41,27 @@ public class InteractionEventListener extends ListenerAdapter {
 
     public static Game game = new Game();
     public static List<TextChannel> textChannel;
-    private SlashCommandInteractionEvent event;
+    public static SlashCommandInteractionEvent eventt;
+    PlayerManager playerManager = PlayerManager.get();
+    String currentDirectory = System.getProperty("user.dir");
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        this.event = event;
+        eventt = event;
+
         super.onSlashCommandInteraction(event);
         switch (event.getName()) {
             case "startmafia":
                 //Get the person who called the command
                 Member member = event.getMember();
+
                 if (member != null) {
                     GuildVoiceState voiceState = member.getVoiceState();
                     //Joins the voice call
                     if (voiceState != null && voiceState.inAudioChannel()) {
                         AudioChannelUnion voiceChannel = voiceState.getChannel();
                         event.getGuild().getAudioManager().openAudioConnection(voiceChannel);
-                        PlayerManager playerManager = PlayerManager.get();
-                        String currentDirectory = System.getProperty("user.dir");
-                        System.out.println("Current working directory: " + currentDirectory);
-                        playerManager.play(
-                            event.getGuild(),
-                            currentDirectory + "/src/main/voicerecording/bekhabid.m4a"
-                        );
-
+                        playAudio("announcement_start");
                         //initalize values for start
                         this.textChannel = event.getGuild().getTextChannelsByName("mafia", true);
                         List<Member> members = voiceChannel.getMembers();
@@ -116,6 +114,7 @@ public class InteractionEventListener extends ListenerAdapter {
 
                         //Set the players connected with discord users
                         game.setPlayers(players);
+                        setPlayersAudio();
                         String mafiaPlayersNames = "";
                         for (Player p : mafiaPlayers) {
                             mafiaPlayersNames += p.getName() + "( " + p.getRole().getRole() + ")" + ",";
@@ -132,11 +131,13 @@ public class InteractionEventListener extends ListenerAdapter {
                                 )
                                 .queue();
                         }
+                        event.reply("Mafia started successfully!").queue();
                     }
                 }
                 break;
             case "reportnight":
                 ReportNight();
+                break;
             case "analyzenight":
                 String result =
                     game.analyzeNight() + "there is currently " + game.getPlayers().size() + " Players in the game.";
@@ -147,6 +148,7 @@ public class InteractionEventListener extends ListenerAdapter {
                     System.out.println("Text Channel not found");
                     return;
                 }
+                break;
             case "removeplayer":
                 List<OptionMapping> options = event.getOptions();
                 if (options.isEmpty() == false) {
@@ -166,6 +168,7 @@ public class InteractionEventListener extends ListenerAdapter {
                     System.out.println("No command was given");
                     return;
                 }
+                break;
             case "startday":
                 List<OptionMapping> optionss = event.getOptions();
                 if (optionss.isEmpty() == false) {
@@ -175,8 +178,34 @@ public class InteractionEventListener extends ListenerAdapter {
                     System.out.println("No command was given for starting day for time");
                     return;
                 }
+                break;
             case "startnight":
                 startNight();
+                break;
+            case "startvote":
+                startVote();
+                break;
+        }
+    }
+
+    public void startVote() {
+        if (this.textChannel.size() != 0) {
+            playAudio("announcement_vote");
+            textChannel.get(0).sendMessage("\nVoting has started...\n").queue();
+            for (Player p : game.getPlayers()) {
+                textChannel
+                    .get(0)
+                    .sendMessage(p.getName() + "\n")
+                    .queue(message -> {
+                        // Upvote the message with a thumbs-up reaction
+                        Emoji thumbsUpEmoji = Emoji.fromUnicode("\uD83D\uDC4D");
+                        message.addReaction(thumbsUpEmoji).queue();
+                    });
+            }
+            System.out.println(textChannel.get(0).getName());
+        } else {
+            System.out.println("Text Channel not found");
+            return;
         }
     }
 
@@ -188,15 +217,15 @@ public class InteractionEventListener extends ListenerAdapter {
             System.out.println("Text Channel not found");
             return;
         }
-        for (Player player : this.game.getPlayers()) {
+        for (Player player : game.getPlayers()) {
             Member member = player.getPlayerThemselves();
             int intervalInSeconds = 2;
 
             // Send a message to the player
             // Send a message to the voice channel
             if (member != null) {
-                event.getGuild().getAudioManager().closeAudioConnection();
-                textChannel.get(0).sendMessage("message").queue();
+                playAudio(player.getTurnAudio());
+                textChannel.get(0).sendMessage("Turn: " + player.getName() + "\n").queue();
             } else {
                 System.out.println("MEMBER NULL");
             }
@@ -208,12 +237,34 @@ public class InteractionEventListener extends ListenerAdapter {
                 e.printStackTrace();
             }
         }
-        String endMessage = "First day ended. Time to sleep!";
-        textChannel.get(0).sendMessage(endMessage).queue();
     }
 
     public void startNight() {
-        for (Player p : this.game.getPlayers()) {
+        playAudio("announcement_night");
+        if (game.getGodfatherNightFinish() == false) {
+            wakeGodFather();
+            return;
+        }
+        if (game.getDoctorNightFinish() == false) {
+            wakeDoctor();
+            return;
+        }
+        /* 
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        playAudio("sleep_mafia");
+
+        wakeDoctor();
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        playAudio("sleep_doctor");
+        for (Player p : game.getPlayers()) {
             if (p.getRole().getRole().equals("detective")) {
                 wakeDetective();
                 System.out.println("WOKE detective");
@@ -232,20 +283,22 @@ public class InteractionEventListener extends ListenerAdapter {
             }
         }
 
-        if (this.game.getIsGodfatherOut() == true) {
+        if (game.getIsGodfatherOut() == true) {
             System.out.println("WE ARE HERE11");
-            for (Player p : this.game.getPlayers()) {
+            for (Player p : game.getPlayers()) {
                 if (p.getRole().getRole().equals("negotiator") || p.getRole().getRole().equals("normalmafia")) {
                     System.out.println("WE ARE HERE");
                     wakeGodFatherSubstitute();
                 }
             }
         }
+        */
     }
 
     public void wakeGodFather() {
         for (Player p : this.game.getPlayers()) {
             if (p.getRole().getRole().equals("godfather")) {
+                playAudio("announcement_mafia");
                 Member member = p.getPlayerThemselves();
                 member
                     .getUser()
@@ -284,6 +337,7 @@ public class InteractionEventListener extends ListenerAdapter {
     public void wakeDoctor() {
         for (Player p : this.game.getPlayers()) {
             if (p.getRole().getRole().equals("doctor")) {
+                playAudio("announcement_doctor");
                 Member member = p.getPlayerThemselves();
                 member
                     .getUser()
@@ -362,6 +416,17 @@ public class InteractionEventListener extends ListenerAdapter {
                 NormalMafiaRole sniperRole = (NormalMafiaRole) p.getRole();
                 System.out.println("nromalmafia shot: " + sniperRole.getKilledPlayer().getName());
             }
+        }
+    }
+
+    public void playAudio(String trackname) {
+        playerManager.play(eventt.getGuild(), currentDirectory + "/src/main/voicerecording/" + trackname + ".m4a");
+    }
+
+    public void setPlayersAudio() {
+        for (Player p : game.getPlayers()) {
+            p.setByeAudio("bye" + "_" + p.getName());
+            p.setTurnAudio("turn" + "_" + p.getName());
         }
     }
 }
