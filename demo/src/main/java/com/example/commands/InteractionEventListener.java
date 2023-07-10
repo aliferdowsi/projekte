@@ -37,11 +37,14 @@ import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Text;
 
+import com.example.gameplay.GamePlay;
+
 public class InteractionEventListener extends ListenerAdapter {
 
     public static Game game = new Game();
     public static List<TextChannel> textChannel;
     public static SlashCommandInteractionEvent eventt;
+    private GamePlay gamePlay;
     PlayerManager playerManager = PlayerManager.get();
     String currentDirectory = System.getProperty("user.dir");
 
@@ -52,18 +55,20 @@ public class InteractionEventListener extends ListenerAdapter {
         super.onSlashCommandInteraction(event);
         switch (event.getName()) {
             case "startmafia":
-                //Get the person who called the command
+                // Get the person who called the command
                 Member member = event.getMember();
 
                 if (member != null) {
                     GuildVoiceState voiceState = member.getVoiceState();
-                    //Joins the voice call
+                    // Joins the voice call
                     if (voiceState != null && voiceState.inAudioChannel()) {
                         AudioChannelUnion voiceChannel = voiceState.getChannel();
                         event.getGuild().getAudioManager().openAudioConnection(voiceChannel);
                         playAudio("announcement_start");
-                        //initalize values for start
+                        // initalize values for start
                         this.textChannel = event.getGuild().getTextChannelsByName("mafia", true);
+                        GamePlay.setGuild(event.getGuild());
+                        GamePlay.setTextChannel(textChannel);
                         List<Member> members = voiceChannel.getMembers();
                         List<Player> players = new ArrayList<>();
 
@@ -87,33 +92,29 @@ public class InteractionEventListener extends ListenerAdapter {
                                 Role role = game.getGameRoles().get(count - 1);
                                 System.out.println("HERE:" + channelMember.getEffectiveName());
                                 Player tempPlayer = new Player(channelMember.getEffectiveName(), role);
-                                //add mafias to mafiaPlayers so they know their teamates later
-                                if (
-                                    role.getRole().equals("godfather") ||
-                                    role.getRole().equals("negotiator") ||
-                                    role.getRole().equals("normalmafia")
-                                ) {
+                                // add mafias to mafiaPlayers so they know their teamates later
+                                if (role.getRole().equals("godfather") ||
+                                        role.getRole().equals("negotiator") ||
+                                        role.getRole().equals("normalmafia")) {
                                     mafiaPlayers.add(tempPlayer);
                                 }
                                 tempPlayer.setPlayerThemselves(channelMember);
                                 players.add(tempPlayer);
                                 channelMember
-                                    .getUser()
-                                    .openPrivateChannel()
-                                    .flatMap(privateChannel ->
-                                        privateChannel.sendMessage(
-                                            "Welcome to Mafia! Your Role is: \n " + role.getRole()
-                                        )
-                                    )
-                                    .queue();
+                                        .getUser()
+                                        .openPrivateChannel()
+                                        .flatMap(privateChannel -> privateChannel.sendMessage(
+                                                "Welcome to Mafia! Your Role is: \n " + role.getRole()))
+                                        .queue();
                                 count--;
                             } else {
                                 break;
                             }
                         }
 
-                        //Set the players connected with discord users
+                        // Set the players connected with discord users
                         game.setPlayers(players);
+                        GamePlay.setGame(game);
                         setPlayersAudio();
                         String mafiaPlayersNames = "";
                         for (Player p : mafiaPlayers) {
@@ -124,26 +125,35 @@ public class InteractionEventListener extends ListenerAdapter {
                         for (Player p : mafiaPlayers) {
                             Member channelMember = p.getPlayerThemselves();
                             channelMember
-                                .getUser()
-                                .openPrivateChannel()
-                                .flatMap(privateChannel ->
-                                    privateChannel.sendMessage("The Mafia team is: " + mafianames)
-                                )
-                                .queue();
+                                    .getUser()
+                                    .openPrivateChannel()
+                                    .flatMap(privateChannel -> privateChannel
+                                            .sendMessage("The Mafia team is: " + mafianames))
+                                    .queue();
                         }
                         event.reply("Mafia started successfully!").queue();
                     }
                 }
                 break;
             case "reportnight":
-                ReportNight();
+                GamePlay.ReportNight();
                 break;
             case "analyzenight":
-                String result =
-                    game.analyzeNight() + "there is currently " + game.getPlayers().size() + " Players in the game.";
+                String result = "";
+                if (game.analyzeNight().size() == 0) {
+                    playAudio("announcement_noOneOut");
+                    textChannel.get(0).sendMessage("Last night, no one died!\n There is currently "
+                            + game.getPlayers().size() + " Players in the game.\n").queue();
+                    return;
+                }
+                for (String a : game.analyzeNight()) {
+                    playAudio("bye_" + a);
+                    result += a + ",";
+                }
+                result += "there is currently " + game.getPlayers().size()
+                        + " Players in the game.";
                 if (this.textChannel.size() != 0) {
                     textChannel.get(0).sendMessage("Last night, the following players died: " + result).queue();
-                    System.out.println(textChannel.get(0).getName());
                 } else {
                     System.out.println("Text Channel not found");
                     return;
@@ -158,9 +168,10 @@ public class InteractionEventListener extends ListenerAdapter {
                         if (temp.getName().equals(removePlayer)) {
                             game.removePlayer(temp);
                             textChannel
-                                .get(0)
-                                .sendMessage("The following played has been successfully voted out: " + removePlayer)
-                                .queue();
+                                    .get(0)
+                                    .sendMessage(
+                                            "The following played has been successfully voted out: " + removePlayer)
+                                    .queue();
                             return;
                         }
                     }
@@ -173,249 +184,18 @@ public class InteractionEventListener extends ListenerAdapter {
                 List<OptionMapping> optionss = event.getOptions();
                 if (optionss.isEmpty() == false) {
                     int time = optionss.get(0).getAsInt();
-                    startDay(time);
+                    GamePlay.startDay(time);
                 } else {
                     System.out.println("No command was given for starting day for time");
                     return;
                 }
                 break;
             case "startnight":
-                startNight();
+                GamePlay.startNight();
                 break;
             case "startvote":
-                startVote();
+                GamePlay.startVote();
                 break;
-        }
-    }
-
-    public void startVote() {
-        if (this.textChannel.size() != 0) {
-            playAudio("announcement_vote");
-            textChannel.get(0).sendMessage("\nVoting has started...\n").queue();
-            for (Player p : game.getPlayers()) {
-                textChannel
-                    .get(0)
-                    .sendMessage(p.getName() + "\n")
-                    .queue(message -> {
-                        // Upvote the message with a thumbs-up reaction
-                        Emoji thumbsUpEmoji = Emoji.fromUnicode("\uD83D\uDC4D");
-                        message.addReaction(thumbsUpEmoji).queue();
-                    });
-            }
-            System.out.println(textChannel.get(0).getName());
-        } else {
-            System.out.println("Text Channel not found");
-            return;
-        }
-    }
-
-    public void startDay(int time) {
-        if (this.textChannel.size() != 0) {
-            textChannel.get(0).sendMessage("Day has started...\n").queue();
-            System.out.println(textChannel.get(0).getName());
-        } else {
-            System.out.println("Text Channel not found");
-            return;
-        }
-        for (Player player : game.getPlayers()) {
-            Member member = player.getPlayerThemselves();
-            int intervalInSeconds = 2;
-
-            // Send a message to the player
-            // Send a message to the voice channel
-            if (member != null) {
-                playAudio(player.getTurnAudio());
-                textChannel.get(0).sendMessage("Turn: " + player.getName() + "\n").queue();
-            } else {
-                System.out.println("MEMBER NULL");
-            }
-
-            // Wait for the interval
-            try {
-                TimeUnit.SECONDS.sleep(time);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void startNight() {
-        playAudio("announcement_night");
-        if (game.getGodfatherNightFinish() == false) {
-            wakeGodFather();
-            return;
-        }
-        if (game.getDoctorNightFinish() == false) {
-            wakeDoctor();
-            return;
-        }
-        /* 
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        playAudio("sleep_mafia");
-
-        wakeDoctor();
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        playAudio("sleep_doctor");
-        for (Player p : game.getPlayers()) {
-            if (p.getRole().getRole().equals("detective")) {
-                wakeDetective();
-                System.out.println("WOKE detective");
-            }
-            if (p.getRole().getRole().equals("doctor")) {
-                wakeDoctor();
-                System.out.println("WOKE DOCTOR");
-            }
-            if (p.getRole().getRole().equals("godfather")) {
-                wakeGodFather();
-                System.out.println("GODFATHER");
-            }
-            if (p.getRole().getRole().equals("sniper")) {
-                wakeSniper();
-                System.out.println("SNIPER");
-            }
-        }
-
-        if (game.getIsGodfatherOut() == true) {
-            System.out.println("WE ARE HERE11");
-            for (Player p : game.getPlayers()) {
-                if (p.getRole().getRole().equals("negotiator") || p.getRole().getRole().equals("normalmafia")) {
-                    System.out.println("WE ARE HERE");
-                    wakeGodFatherSubstitute();
-                }
-            }
-        }
-        */
-    }
-
-    public void wakeGodFather() {
-        for (Player p : this.game.getPlayers()) {
-            if (p.getRole().getRole().equals("godfather")) {
-                playAudio("announcement_mafia");
-                Member member = p.getPlayerThemselves();
-                member
-                    .getUser()
-                    .openPrivateChannel()
-                    .queue(privateChannel -> {
-                        privateChannel.sendMessage("Choose someone to Kill!\n").queue();
-                        String message = "";
-                        for (int i = 0; i < this.game.getPlayers().size(); i++) {
-                            message += i + " - " + this.game.getPlayers().get(i).getName() + "\n";
-                        }
-                        privateChannel.sendMessage(message + "\n").queue();
-                    });
-            }
-        }
-    }
-
-    public void wakeGodFatherSubstitute() {
-        for (Player p : this.game.getPlayers()) {
-            if (p.getRole().getRole().equals("negotiator") || p.getRole().getRole().equals("normalmafia")) {
-                Member member = p.getPlayerThemselves();
-                member
-                    .getUser()
-                    .openPrivateChannel()
-                    .queue(privateChannel -> {
-                        privateChannel.sendMessage("Choose someone to Kill!\n").queue();
-                        String message = "";
-                        for (int i = 0; i < this.game.getPlayers().size(); i++) {
-                            message += i + " - " + this.game.getPlayers().get(i).getName() + "\n";
-                        }
-                        privateChannel.sendMessage(message + "\n").queue();
-                    });
-            }
-        }
-    }
-
-    public void wakeDoctor() {
-        for (Player p : this.game.getPlayers()) {
-            if (p.getRole().getRole().equals("doctor")) {
-                playAudio("announcement_doctor");
-                Member member = p.getPlayerThemselves();
-                member
-                    .getUser()
-                    .openPrivateChannel()
-                    .queue(privateChannel -> {
-                        privateChannel.sendMessage("Choose someone to SAVE!\n").queue();
-                        String message = "";
-                        for (int i = 0; i < this.game.getPlayers().size(); i++) {
-                            message += i + " - " + this.game.getPlayers().get(i).getName() + "\n";
-                        }
-                        privateChannel.sendMessage(message + "\n").queue();
-                    });
-            }
-        }
-    }
-
-    public void wakeSniper() {
-        for (Player p : this.game.getPlayers()) {
-            if (p.getRole().getRole().equals("sniper")) {
-                Member member = p.getPlayerThemselves();
-                member
-                    .getUser()
-                    .openPrivateChannel()
-                    .queue(privateChannel -> {
-                        privateChannel.sendMessage("Choose someone to SHOOT!\n").queue();
-                        String message = "";
-                        for (int i = 0; i < this.game.getPlayers().size(); i++) {
-                            message += i + " - " + this.game.getPlayers().get(i).getName() + "\n";
-                        }
-                        privateChannel.sendMessage(message + "\n").queue();
-                    });
-            }
-        }
-    }
-
-    public void wakeDetective() {
-        for (Player p : this.game.getPlayers()) {
-            if (p.getRole().getRole().equals("detective")) {
-                Member member = p.getPlayerThemselves();
-                member
-                    .getUser()
-                    .openPrivateChannel()
-                    .queue(privateChannel -> {
-                        privateChannel.sendMessage("Choose someone to guess their identity!\n").queue();
-                        String message = "";
-                        for (int i = 0; i < this.game.getPlayers().size(); i++) {
-                            message += i + " - " + this.game.getPlayers().get(i).getName() + "\n";
-                        }
-                        privateChannel.sendMessage(message + "\n").queue();
-                    });
-            }
-        }
-    }
-
-    public void wakeNegotiator() {}
-
-    public void ReportNight() {
-        System.out.println("Printing the report:");
-        for (Player p : this.game.getPlayers()) {
-            if (p.getRole().getRole() == "godfather") {
-                GodFatherRole godFatherRole = (GodFatherRole) p.getRole();
-                System.out.println("godfather killed: " + godFatherRole.getKilledPlayer().getName());
-            } else if (p.getRole().getRole() == "detective") {
-                DetectiveRole detectiverRole = (DetectiveRole) p.getRole();
-                System.out.println("detective gussed: " + detectiverRole.getGussedPlayer().getName());
-            } else if (p.getRole().getRole() == "doctor") {
-                DoctorRole doctorRole = (DoctorRole) p.getRole();
-                System.out.println("doctor saved: " + doctorRole.getSavedPlayer().getName());
-            } else if (p.getRole().getRole() == "sniper") {
-                SniperRole sniperRole = (SniperRole) p.getRole();
-                System.out.println("sniper shot: " + sniperRole.getShottedPlayer().getName());
-            } else if (p.getRole().getRole() == "negotiator") {
-                NegotiatorRole sniperRole = (NegotiatorRole) p.getRole();
-                System.out.println("negotiator shot: " + sniperRole.getKilledPlayer().getName());
-            } else if (p.getRole().getRole() == "nromalmafia") {
-                NormalMafiaRole sniperRole = (NormalMafiaRole) p.getRole();
-                System.out.println("nromalmafia shot: " + sniperRole.getKilledPlayer().getName());
-            }
         }
     }
 

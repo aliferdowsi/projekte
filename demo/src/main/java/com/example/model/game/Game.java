@@ -66,16 +66,15 @@ public class Game {
     }
 
     private List<Role> gameRoles = new ArrayList<>(
-        Arrays.asList(
-            new GodFatherRole(),
-            //new NegotiatorRole(),
-            //new DetectiveRole(),
-            new DoctorRole()
-            //new SniperRole()
-        )
-    );
+            Arrays.asList(
+                    new GodFatherRole(),
+                    // new NegotiatorRole(),
+                    // new DetectiveRole(),
+                    new DoctorRole(),
+                    new SniperRole()));
 
-    public Game() {}
+    public Game() {
+    }
 
     public void initalizeGame(int extraMafia, int extraCitizen) {
         for (int i = 0; i < extraMafia; i++) {
@@ -104,10 +103,11 @@ public class Game {
         this.gameRoles = gameRoles;
     }
 
-    public String analyzeNight() {
+    public List<String> analyzeNight() {
         List<Player> lostPlayers = new ArrayList<Player>();
         String doctorSavedName = "";
-        String deadPlayers = "";
+        List<String> deadPlayers = new ArrayList<>();
+
         for (Player p : getPlayers()) {
             if (p.getRole().getRole() == "doctor") {
                 DoctorRole role = (DoctorRole) p.getRole();
@@ -121,14 +121,14 @@ public class Game {
                 GodFatherRole godFatherRole = (GodFatherRole) p.getRole();
                 Player killed = godFatherRole.getKilledPlayer();
                 if (killed.getName().equals(doctorSavedName) == false && killed != null) {
-                    deadPlayers += killed.getName();
+                    deadPlayers.add(killed.getName());
                     removePlayer(killed);
                 }
             } else if (p.getRole().getRole() == "sniper") {
                 SniperRole godFatherRole = (SniperRole) p.getRole();
                 Player shottedPlayer = godFatherRole.getShottedPlayer();
                 if (shottedPlayer.getRole().equals("godfather") == false && shottedPlayer != null) {
-                    deadPlayers += shottedPlayer.getName() + ",";
+                    deadPlayers.add(shottedPlayer.getName());
                     removePlayer(shottedPlayer);
                 }
             } else if (p.getRole().getRole() == "negotiator") {
@@ -136,7 +136,7 @@ public class Game {
                 if (negotiatorRole.getKilledPlayer() != null) {
                     Player shottedPlayer = negotiatorRole.getKilledPlayer();
                     if (shottedPlayer.getName().equals(doctorSavedName) == false) {
-                        deadPlayers += shottedPlayer.getName() + ",";
+                        deadPlayers.add(shottedPlayer.getName());
                         removePlayer(shottedPlayer);
                     }
                 }
@@ -145,7 +145,7 @@ public class Game {
                 if (normalMafiaRole.getKilledPlayer() != null) {
                     Player shottedPlayer = normalMafiaRole.getKilledPlayer();
                     if (shottedPlayer.getName().equals(doctorSavedName) == false) {
-                        deadPlayers += shottedPlayer.getName() + ",";
+                        deadPlayers.add(shottedPlayer.getName());
                         removePlayer(shottedPlayer);
                     }
                 }
