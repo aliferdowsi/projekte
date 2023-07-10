@@ -108,10 +108,12 @@ public class Game {
         String doctorSavedName = "";
         List<String> deadPlayers = new ArrayList<>();
 
+        System.out.println("___________________NIGHT___________________");
         for (Player p : getPlayers()) {
             if (p.getRole().getRole() == "doctor") {
                 DoctorRole role = (DoctorRole) p.getRole();
                 doctorSavedName = role.getSavedPlayer().getName();
+                System.out.println("doctor saved:" + doctorSavedName);
                 break;
             }
         }
@@ -120,17 +122,31 @@ public class Game {
             if (p.getRole().getRole() == "godfather") {
                 GodFatherRole godFatherRole = (GodFatherRole) p.getRole();
                 Player killed = godFatherRole.getKilledPlayer();
+                if (killed != null)
+                    System.out.println("gf killed:" + killed.getName());
                 if (killed.getName().equals(doctorSavedName) == false && killed != null) {
                     deadPlayers.add(killed.getName());
                     removePlayer(killed);
+                    System.out.println("11111111111");
                 }
             } else if (p.getRole().getRole() == "sniper") {
                 SniperRole godFatherRole = (SniperRole) p.getRole();
                 Player shottedPlayer = godFatherRole.getShottedPlayer();
-                if (shottedPlayer.getRole().equals("godfather") == false && shottedPlayer != null) {
-                    deadPlayers.add(shottedPlayer.getName());
-                    removePlayer(shottedPlayer);
+
+                if (shottedPlayer != null) {
+                    if (shottedPlayer.getRole().equals("godfather") == false
+                            && (shottedPlayer.getRole().equals("negotiator") == true
+                                    || shottedPlayer.getRole().equals("normalmafia") == true)) {
+                        deadPlayers.add(shottedPlayer.getName());
+                        removePlayer(shottedPlayer);
+                        System.out.println("222222222");
+                    } else {
+                        deadPlayers.add(p.getName());
+                        removePlayer(p);
+                        System.out.println("5555555555");
+                    }
                 }
+
             } else if (p.getRole().getRole() == "negotiator") {
                 NegotiatorRole negotiatorRole = (NegotiatorRole) p.getRole();
                 if (negotiatorRole.getKilledPlayer() != null) {
@@ -138,6 +154,7 @@ public class Game {
                     if (shottedPlayer.getName().equals(doctorSavedName) == false) {
                         deadPlayers.add(shottedPlayer.getName());
                         removePlayer(shottedPlayer);
+                        System.out.println("33333333333");
                     }
                 }
             } else if (p.getRole().getRole() == "normalmafia") {
@@ -147,6 +164,7 @@ public class Game {
                     if (shottedPlayer.getName().equals(doctorSavedName) == false) {
                         deadPlayers.add(shottedPlayer.getName());
                         removePlayer(shottedPlayer);
+                        System.out.println("444444444");
                     }
                 }
             }

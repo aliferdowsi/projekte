@@ -50,12 +50,13 @@ public class InteractionEventListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        eventt = event;
 
         super.onSlashCommandInteraction(event);
         switch (event.getName()) {
             case "startmafia":
                 // Get the person who called the command
+                eventt = event;
+
                 Member member = event.getMember();
 
                 if (member != null) {
@@ -140,19 +141,21 @@ public class InteractionEventListener extends ListenerAdapter {
                 break;
             case "analyzenight":
                 String result = "";
-                if (game.analyzeNight().size() == 0) {
+                List<String> deadPlayerNames = game.analyzeNight();
+
+                if (deadPlayerNames.size() == 0) {
                     playAudio("announcement_noOneOut");
                     textChannel.get(0).sendMessage("Last night, no one died!\n There is currently "
                             + game.getPlayers().size() + " Players in the game.\n").queue();
                     return;
                 }
-                for (String a : game.analyzeNight()) {
-                    playAudio("bye_" + a);
-                    result += a + ",";
+                for (String deadPlayer : deadPlayerNames) {
+                    playAudio("bye_" + deadPlayer);
+                    result += deadPlayer + ",";
                 }
                 result += "there is currently " + game.getPlayers().size()
                         + " Players in the game.";
-                if (this.textChannel.size() != 0) {
+                if (textChannel.size() != 0) {
                     textChannel.get(0).sendMessage("Last night, the following players died: " + result).queue();
                 } else {
                     System.out.println("Text Channel not found");
