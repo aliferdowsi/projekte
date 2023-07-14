@@ -12,7 +12,7 @@ public class DiscordBot {
 
         public static void main(String[] args) throws LoginException {
                 JDABuilder jdaBuilder = JDABuilder
-                                .createDefault("x");
+                                .createDefault("MTEyNjYzNDM4MTcxMzM1MDgyNg.Gj146E.nhLTDVawpnCfrS6ufsbudl_4bc4W6UsfLVNUCI");
                 JDA jda = jdaBuilder
                                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
                                 .addEventListeners(new MessageEventListener(), new InteractionEventListener())
