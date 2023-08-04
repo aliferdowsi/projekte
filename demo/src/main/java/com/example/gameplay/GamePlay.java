@@ -406,32 +406,55 @@ public class GamePlay {
 
     public static void wakeUpInOrder() {
         if (game.getIsGodfatherOut() == true) {
-            if (game.getGodfatherNightFinish() == false) {
+            if (game.getGodfatherNightFinish() != null && game.getGodfatherNightFinish() == false) {
                 System.out.println("sub gf");
                 wakeGodFatherSubstitute();
                 return;
             }
         } else {
-            if (game.getGodfatherNightFinish() == false) {
+            if (game.getGodfatherNightFinish() != null && game.getGodfatherNightFinish() == false) {
                 System.out.println("gf");
                 wakeGodFather();
                 return;
             }
         }
-        if (game.getDoctorNightFinish() == false) {
+        if (game.getDoctorNightFinish() != null && game.getDoctorNightFinish() == false) {
             System.out.println("doc");
             wakeDoctor();
             return;
         }
-        if (game.getDetectiveNightFinish() == false) {
+        if (game.getDetectiveNightFinish() != null && game.getDetectiveNightFinish() == false) {
             System.out.println("det");
             wakeDetective();
             return;
         }
-        if (game.getSniperNightFinish() == false) {
+        if (game.getSniperNightFinish() != null && game.getSniperNightFinish() == false) {
             System.out.println("sniper");
             wakeSniper();
             return;
+        }
+
+    }
+
+    public static void setIsRoleOut() {
+        for (Player p : game.getPlayers()) {
+
+            if (p.getRole().getRole() == "godfather") {
+                game.setGodfatherNightFinish(false);
+                continue;
+            }
+            if (p.getRole().getRole() == "doctor") {
+                game.setDoctorNightFinish(false);
+                continue;
+            }
+            if (p.getRole().getRole() == "sniper") {
+                game.setSniperNightFinish(false);
+                continue;
+            }
+            if (p.getRole().getRole() == "detective") {
+                game.setDetectiveNightFinish(false);
+                continue;
+            }
         }
 
     }

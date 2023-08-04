@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class DiscordBot {
 
+<<<<<<< HEAD
     public static void main(String[] args) throws LoginException {
         JDABuilder jdaBuilder = JDABuilder.createDefault(
             "Msad"
@@ -18,6 +19,15 @@ public class DiscordBot {
             .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
             .addEventListeners(new MessageEventListener(), new InteractionEventListener())
             .build();
+=======
+        public static void main(String[] args) throws LoginException {
+                JDABuilder jdaBuilder = JDABuilder
+                                .createDefault("MTEyNjYzNDM4MTcxMzM1MDgyNg.Gj146E.nhLTDVawpnCfrS6ufsbudl_4bc4W6UsfLVNUCI");
+                JDA jda = jdaBuilder
+                                .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
+                                .addEventListeners(new MessageEventListener(), new InteractionEventListener())
+                                .build();
+>>>>>>> c23b8b9558f3ef5f2785ede623aef5c77262c2dc
 
         jda
             .upsertCommand("startmafia", "This command starts the mafia game")

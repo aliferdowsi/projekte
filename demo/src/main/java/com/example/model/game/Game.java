@@ -1,5 +1,6 @@
 package com.example.model.game;
 
+import com.example.gameplay.GamePlay;
 import com.example.model.player.Player;
 import com.example.model.role.DetectiveRole;
 import com.example.model.role.DoctorRole;
@@ -20,10 +21,10 @@ public class Game {
     private List<Player> players;
     private Boolean isGodfatherOut = false;
 
-    private Boolean godfatherNightFinish = false;
-    private Boolean doctorNightFinish = false;
-    private Boolean detectiveNightFinish = false;
-    private Boolean sniperNightFinish = false;
+    private Boolean godfatherNightFinish;
+    private Boolean doctorNightFinish;
+    private Boolean detectiveNightFinish;
+    private Boolean sniperNightFinish;
 
     public Boolean getGodfatherNightFinish() {
         return godfatherNightFinish;
@@ -70,7 +71,12 @@ public class Game {
                     new GodFatherRole(),
                     // new NegotiatorRole(),
                     new DetectiveRole(),
+<<<<<<< HEAD
                     new DoctorRole()));
+=======
+                    new DoctorRole(),
+                    new SniperRole()));
+>>>>>>> c23b8b9558f3ef5f2785ede623aef5c77262c2dc
 
     public Game() {
     }
@@ -143,9 +149,12 @@ public class Game {
                         removePlayer(shottedPlayer);
                         System.out.println("222222222");
                     } else {
-                        deadPlayers.add(p.getName());
-                        removePlayer(p);
-                        System.out.println("5555555555");
+                        if (shottedPlayer.getRole().equals("godfather") == false) {
+
+                            deadPlayers.add(p.getName());
+                            removePlayer(p);
+                            System.out.println("5555555555" + shottedPlayer.getName());
+                        }
                     }
                 }
 
@@ -171,6 +180,8 @@ public class Game {
                 }
             }
         }
+        GamePlay.playAudio("announcement_day");
+        GamePlay.setIsRoleOut();
         return deadPlayers;
     }
 
@@ -203,7 +214,24 @@ public class Game {
             Player playertemp = getPlayers().get(j);
             if (playertemp.getName().equals(player.getName())) {
                 if (playertemp.getRole().getRole().equals("godfather") == true) {
+<<<<<<< HEAD
+=======
+                    System.out.println("WE ARE HERE222");
+                    setGodfatherNightFinish(null);
+>>>>>>> c23b8b9558f3ef5f2785ede623aef5c77262c2dc
                     isGodfatherOut = true;
+                }
+                if (playertemp.getRole().getRole() == "doctor") {
+                    setDoctorNightFinish(null);
+                    continue;
+                }
+                if (playertemp.getRole().getRole() == "sniper") {
+                    setSniperNightFinish(null);
+                    continue;
+                }
+                if (playertemp.getRole().getRole() == "detective") {
+                    setDetectiveNightFinish(null);
+                    continue;
                 }
                 getPlayers().remove(j);
             }

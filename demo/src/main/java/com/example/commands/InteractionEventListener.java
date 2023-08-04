@@ -105,7 +105,8 @@ public class InteractionEventListener extends ListenerAdapter {
                                         .getUser()
                                         .openPrivateChannel()
                                         .flatMap(privateChannel -> privateChannel.sendMessage(
-                                                "Welcome to Mafia! Your Role is: \n " + role.getRole()))
+                                                "----------------------------------------------------------------\nWelcome to Mafia! Your Role is: \n "
+                                                        + role.getRole()))
                                         .queue();
                                 count--;
                             } else {
@@ -116,6 +117,7 @@ public class InteractionEventListener extends ListenerAdapter {
                         // Set the players connected with discord users
                         game.setPlayers(players);
                         GamePlay.setGame(game);
+                        GamePlay.setIsRoleOut();
                         setPlayersAudio();
                         String mafiaPlayersNames = "";
                         GamePlay.setMafiaPlayers(mafiaPlayers);
