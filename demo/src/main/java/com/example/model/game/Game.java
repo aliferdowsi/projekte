@@ -69,9 +69,8 @@ public class Game {
             Arrays.asList(
                     new GodFatherRole(),
                     // new NegotiatorRole(),
-                    // new DetectiveRole(),
-                    new DoctorRole(),
-                    new SniperRole()));
+                    new DetectiveRole(),
+                    new DoctorRole()));
 
     public Game() {
     }
@@ -134,6 +133,9 @@ public class Game {
                 Player shottedPlayer = godFatherRole.getShottedPlayer();
 
                 if (shottedPlayer != null) {
+                    if(shottedPlayer.getRole().equals("sniper") == true ){
+                        continue;
+                    }
                     if (shottedPlayer.getRole().equals("godfather") == false
                             && (shottedPlayer.getRole().equals("negotiator") == true
                                     || shottedPlayer.getRole().equals("normalmafia") == true)) {
@@ -201,7 +203,6 @@ public class Game {
             Player playertemp = getPlayers().get(j);
             if (playertemp.getName().equals(player.getName())) {
                 if (playertemp.getRole().getRole().equals("godfather") == true) {
-                    System.out.println("WE ARE HERE222");
                     isGodfatherOut = true;
                 }
                 getPlayers().remove(j);

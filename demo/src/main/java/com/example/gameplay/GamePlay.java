@@ -26,6 +26,15 @@ public class GamePlay {
     // The discord channel
     private static Guild guild;
     static PlayerManager playerManager = PlayerManager.get();
+    private static List<Player> mafiaPlayers;
+    public static List<Player> getMafiaPlayers() {
+        return mafiaPlayers;
+    }
+
+    public static void setMafiaPlayers(List<Player> mafiaPlayers) {
+        GamePlay.mafiaPlayers = mafiaPlayers;
+    }
+
     static String currentDirectory = System.getProperty("user.dir");
 
     public static void startDay(int time) {
@@ -38,7 +47,6 @@ public class GamePlay {
         }
         for (Player player : game.getPlayers()) {
             Member member = player.getPlayerThemselves();
-            int intervalInSeconds = 2;
 
             // Send a message to the player
             // Send a message to the voice channel
@@ -48,13 +56,7 @@ public class GamePlay {
             } else {
                 System.out.println("MEMBER NULL");
             }
-
-            // Wait for the interval
-            try {
-                TimeUnit.SECONDS.sleep(time);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            
         }
     }
 

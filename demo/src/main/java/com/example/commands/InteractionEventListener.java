@@ -118,20 +118,8 @@ public class InteractionEventListener extends ListenerAdapter {
                         GamePlay.setGame(game);
                         setPlayersAudio();
                         String mafiaPlayersNames = "";
-                        for (Player p : mafiaPlayers) {
-                            mafiaPlayersNames += p.getName() + "( " + p.getRole().getRole() + ")" + ",";
-                        }
-                        final String mafianames = mafiaPlayersNames;
-                        // Tell Mafia their friends
-                        for (Player p : mafiaPlayers) {
-                            Member channelMember = p.getPlayerThemselves();
-                            channelMember
-                                    .getUser()
-                                    .openPrivateChannel()
-                                    .flatMap(privateChannel -> privateChannel
-                                            .sendMessage("The Mafia team is: " + mafianames))
-                                    .queue();
-                        }
+                        GamePlay.setMafiaPlayers(mafiaPlayers);
+                        
                         event.reply("Mafia started successfully!").queue();
                     }
                 }
@@ -199,7 +187,23 @@ public class InteractionEventListener extends ListenerAdapter {
             case "startvote":
                 GamePlay.startVote();
                 break;
-        }
+            case "tellmafiateam":
+                String mafiaPlayersNames = "";
+                for (Player p : GamePlay.getMafiaPlayers()) {
+                    mafiaPlayersNames += p.getName() + "( " + p.getRole().getRole() + ")" + ",";
+                }
+                final String mafianames = mafiaPlayersNames;
+                // Tell Mafia their friends
+                for (Player p : GamePlay.getMafiaPlayers()) {
+                    Member channelMember = p.getPlayerThemselves();
+                    channelMember
+                            .getUser()
+                            .openPrivateChannel()
+                            .flatMap(privateChannel -> privateChannel
+                                    .sendMessage("The Mafia team is: " + mafianames))
+                            .queue();
+                }
+}
     }
 
     public void playAudio(String trackname) {
