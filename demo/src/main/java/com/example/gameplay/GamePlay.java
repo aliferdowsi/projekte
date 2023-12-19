@@ -27,6 +27,7 @@ public class GamePlay {
     private static Guild guild;
     static PlayerManager playerManager = PlayerManager.get();
     private static List<Player> mafiaPlayers;
+
     public static List<Player> getMafiaPlayers() {
         return mafiaPlayers;
     }
@@ -48,15 +49,13 @@ public class GamePlay {
         for (Player player : game.getPlayers()) {
             Member member = player.getPlayerThemselves();
 
-            // Send a message to the player
-            // Send a message to the voice channel
             if (member != null) {
                 playAudio(player.getTurnAudio());
                 textChannel.get(0).sendMessage("Turn: " + player.getName() + "\n").queue();
             } else {
                 System.out.println("MEMBER NULL");
             }
-            
+
         }
     }
 
@@ -104,6 +103,10 @@ public class GamePlay {
                         });
             }
         }
+    }
+
+    public static void wakeNegotiator() {
+        // TO DO
     }
 
     public static void wakeGodFatherSubstitute() {
@@ -243,6 +246,11 @@ public class GamePlay {
         }
         playAudio("sleep_detective");
         return true;
+    }
+
+    public static boolean setNegotiatorNightData(int authorIndex, int targetIndex, MessageReceivedEvent event) {
+        // TO DO
+        return false;
     }
 
     public static boolean setDoctorNightData(int authorIndex, int targetIndex, MessageReceivedEvent event) {

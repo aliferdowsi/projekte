@@ -10,52 +10,41 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class DiscordBot {
 
-<<<<<<< HEAD
     public static void main(String[] args) throws LoginException {
-        JDABuilder jdaBuilder = JDABuilder.createDefault(
-            "Msad"
-        );
+        JDABuilder jdaBuilder = JDABuilder
+                .createDefault("MTEyNjYzNDM4MTcxMzM1MDgyNg.Gj146E.nhLTDVawpnCfrS6ufsbudl_4bc4W6UsfLVNUCI");
         JDA jda = jdaBuilder
-            .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
-            .addEventListeners(new MessageEventListener(), new InteractionEventListener())
-            .build();
-=======
-        public static void main(String[] args) throws LoginException {
-                JDABuilder jdaBuilder = JDABuilder
-                                .createDefault("MTEyNjYzNDM4MTcxMzM1MDgyNg.Gj146E.nhLTDVawpnCfrS6ufsbudl_4bc4W6UsfLVNUCI");
-                JDA jda = jdaBuilder
-                                .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
-                                .addEventListeners(new MessageEventListener(), new InteractionEventListener())
-                                .build();
->>>>>>> c23b8b9558f3ef5f2785ede623aef5c77262c2dc
+                .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
+                .addEventListeners(new MessageEventListener(), new InteractionEventListener())
+                .build();
 
         jda
-            .upsertCommand("startmafia", "This command starts the mafia game")
-            .setGuildOnly(false)
-            .addOption(OptionType.INTEGER, "extramafias", "Extra Normal Mafia's", true)
-            .addOption(OptionType.INTEGER, "extracitizen", "Extra Normal Citizen's", true)
-            .queue();
+                .upsertCommand("startmafia", "This command starts the mafia game")
+                .setGuildOnly(false)
+                .addOption(OptionType.INTEGER, "extramafias", "Extra Normal Mafia's", true)
+                .addOption(OptionType.INTEGER, "extracitizen", "Extra Normal Citizen's", true)
+                .queue();
         jda
-            .upsertCommand("analyzenight", "This command analyz what happened at night and tells the users")
-            .setGuildOnly(false)
-            .queue();
+                .upsertCommand("analyzenight", "This command analyz what happened at night and tells the users")
+                .setGuildOnly(false)
+                .queue();
         jda
-            .upsertCommand("reportnight", "This command reports what happened at night (ONLY FOR DEBUGGING)")
-            .setGuildOnly(false)
-            .queue();
+                .upsertCommand("reportnight", "This command reports what happened at night (ONLY FOR DEBUGGING)")
+                .setGuildOnly(false)
+                .queue();
         jda
-            .upsertCommand("removeplayer", "This command reports what happened at night")
-            .setGuildOnly(false)
-            .addOption(OptionType.STRING, "playertoberemoved", "Player to be removed", true)
-            .queue();
+                .upsertCommand("removeplayer", "This command reports what happened at night")
+                .setGuildOnly(false)
+                .addOption(OptionType.STRING, "playertoberemoved", "Player to be removed", true)
+                .queue();
         jda
-            .upsertCommand("startday", "Starts the Day")
-            .setGuildOnly(false)
-            .addOption(OptionType.INTEGER, "second", "Player's turn in Seconds", true)
-            .queue();
+                .upsertCommand("startday", "Starts the Day")
+                .setGuildOnly(false)
+                .addOption(OptionType.INTEGER, "second", "Player's turn in Seconds", true)
+                .queue();
         jda.upsertCommand("startnight", "Starts the Night").setGuildOnly(false).queue();
         jda.upsertCommand("startvote", "Starts the Voting").setGuildOnly(false).queue();
         jda.upsertCommand("tellmafiateam", "tells mafia their teamates").setGuildOnly(false).queue();
-        
+
     }
 }
