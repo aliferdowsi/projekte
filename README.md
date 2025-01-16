@@ -17,7 +17,7 @@ A functional Poker Texas Holdem game developed using C++ and the Qt framework. T
 
 ### Features
 
-- Real-time multiplayer gameplay
+- Real-time gameplay
 - Graphical user interface
 - Support for standard Texas Holdem rules
 
