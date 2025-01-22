@@ -23,7 +23,7 @@ A functional Poker Texas Holdem game developed using C++ and the Qt framework. T
 
 ---
 
-## Project 2: Mafia/Werewolf Discord Bot (Mafia/Werewolf-Discord-Bot)
+## Project 2: Mafia/Werewolf Discord Bot (In Progress)
 
 ### Overview
 
